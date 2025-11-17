@@ -15,10 +15,15 @@ app.use("/api/reseñas", reseñasRoutes);
 
 mongoose
   .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log("✔ Conectado a MongoDB");
-    app.listen(process.env.PORT, () => {
-      console.log("✔ Servidor backend en http://localhost:" + process.env.PORT);
-    });
-  })
-  .catch((err) => console.error("Error MongoDB:", err));
+  .then(() => console.log("✔ Conectado a MongoDB"))
+  .catch(err => {
+    console.error("❌ Error MongoDB:", err);
+    setTimeout(() => mongoose.connect(process.env.MONGODB_URI), 5000); // reintenta
+  });
+
+mongoose.connection.on("disconnected", () => {
+  console.log("⚠ MongoDB desconectado, intentando reconectar...");
+  mongoose.connect(process.env.MONGODB_URI);
+});
+
+
